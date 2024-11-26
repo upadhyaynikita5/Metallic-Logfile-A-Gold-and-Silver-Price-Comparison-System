@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compare Gold and Silver Fluctuation</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+
+      h1 {
+        color: #333;
+      }
+
+      form {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+      }
+
+      input[type="date"] {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      button {
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 16px;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      .results,
+      .error {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+        width: 100%;
+        margin-top: 20px;
+        text-align: left;
+      }
+
+      .error {
+        color: #d9534f;
+        border-left: 5px solid #d9534f;
+      }
+
+      .results p {
+        margin: 0;
+        padding: 5px 0;
+      }
+
+      .results span {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Compare Gold and Silver Data</h1>
+    <form id="compareForm">
+      <label for="startDate">Start Date:</label>
+      <input type="date" id="startDate" name="startDate" required />
+
+      <label for="endDate">End Date:</label>
+      <input type="date" id="endDate" name="endDate" required />
+
+      <button type="submit">Compare</button>
+    </form>
+
+    <div class="results" id="results" style="display: none"></div>
+    <div class="error" id="error" style="display: none"></div>
+
+    <script>
+      document
+        .getElementById("compareForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const startDate = document.getElementById("startDate").value;
+          const endDate = document.getElementById("endDate").value;
+          const url = `http://127.0.0.1:8080/compare?start_date=${startDate}&end_date=${endDate}`;
+
+          fetch(url)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.message) {
+                document.getElementById("results").style.display = "none";
+                document.getElementById("error").style.display = "block";
+                document.getElementById("error").innerText = data.message;
+              } else {
+                document.getElementById("error").style.display = "none";
+                document.getElementById("results").style.display = "block";
+                document.getElementById("results").innerHTML = `
+                            <p><span>Start Date:</span> ${new Date(
+                              data.start_date * 1000
+                            ).toLocaleDateString()}</p>
+                            <p><span>End Date:</span> ${new Date(
+                              data.end_date * 1000
+                            ).toLocaleDateString()}</p>
+                            <p><span>Gold Mean:</span> ${data.gold_mean}</p>
+                            <p><span>Gold Variance:</span> ${
+                              data.gold_variance
+                            }</p>
+                            <p><span>Silver Mean:</span> ${data.silver_mean}</p>
+                            <p><span>Silver Variance:</span> ${
+                              data.silver_variance
+                            }</p>
+                        `;
+              }
+            })
+            .catch((error) => {
+              document.getElementById("results").style.display = "none";
+              document.getElementById("error").style.display = "block";
+              document.getElementById("error").innerText =
+                "An error occurred while fetching the data.";
+            });
+        });
+    </script>
+  </body>
+</html>
